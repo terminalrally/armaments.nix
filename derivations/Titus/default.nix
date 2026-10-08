@@ -2,7 +2,7 @@
 
 buildGoModule rec {
   pname = "titus";
-  version = "1.2.8";
+  version = "1.2.10";
 
   src = fetchFromGitHub {
     owner = "praetorian-inc";
