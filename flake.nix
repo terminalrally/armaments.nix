@@ -17,19 +17,19 @@
   outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
         unstable = import nixpkgs-unstable { inherit system; };
 
-        # Packages that need a newer toolchain than the stable channel provides.
-        extraArgs = {
-          Titus = { inherit (unstable) buildGoModule; };
+        # Go tools routinely require the newest toolchain; take it from unstable.
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ (final: prev: { inherit (unstable) buildGoModule; }) ];
         };
 
         packageDir = builtins.attrNames (builtins.readDir ./derivations);
 
         packages = builtins.listToAttrs (map (name: {
           inherit name;
-          value = pkgs.callPackage (./derivations + "/${name}") (extraArgs.${name} or { });
+          value = pkgs.callPackage (./derivations + "/${name}") { };
         }) packageDir);
       in { packages = packages // {
         default = packages.LokiWallpaper;
